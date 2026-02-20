@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-[#060b13] text-slate-200 antialiased m-0 p-0 overflow-hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+}
+
+@layer components {
+  /* --- The Signature Glassmorphism --- */
+  .glass-card {
+    @apply bg-slate-900/40 border border-slate-800/60 backdrop-blur-2xl shadow-2xl transition-all duration-500 ease-out;
+  }
+
+  .glass-card:hover {
+    @apply border-emerald-500/30 shadow-emerald-500/10 -translate-y-1;
+  }
+
+  /* --- Professional Custom Scrollbar --- */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-800 rounded-full hover:bg-emerald-500/40 transition-colors;
+  }
+}
+
+/* --- Global Animations --- */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2.5s infinite linear;
+}
+
+/* --- Autofill Overrides --- */
+input:-webkit-autofill {
+  -webkit-text-fill-color: #f8fafc !important;
+  -webkit-box-shadow: 0 0 0px 1000px #0f172a inset !important;
+}

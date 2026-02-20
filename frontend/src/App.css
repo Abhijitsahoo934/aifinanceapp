@@ -1,0 +1,73 @@
+/* --- Global Layout Resets --- */
+#root {
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  /* Removed max-width to allow the Sidebar + Content layout to breathe */
+}
+
+/* --- Framer Motion Helper Classes --- */
+/* These classes ensure smooth hardware-accelerated transitions */
+.page-transition-wrapper {
+  perspective: 1000px;
+  backface-visibility: hidden;
+}
+
+/* --- Custom Scrollbar - The "Fintech" Look --- */
+/* Applied globally to the main content area for a professional feel */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(30, 41, 59, 0.5); /* Slate-800/50 */
+  border-radius: 100px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.3); /* Emerald-500/30 */
+}
+
+/* --- Interactive Card Shimmer --- */
+/* Used for the 'Capital & Goals' page loading/hover effects */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+}
+
+/* --- Subtle Glassmorphism Utility --- */
+.glass-card {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- Typography Optimization --- */
+/* Force Inter or System UI across all browsers for consistent weight */
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Removing the default blue outline on focused elements for custom Tailwind rings */
+:focus {
+  outline: none !important;
+}
+
+/* --- Global Selection Color --- */
+::selection {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}

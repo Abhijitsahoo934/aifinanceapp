@@ -1,0 +1,95 @@
+import React from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AnimatePresence } from 'framer-motion';
+
+// Layouts - The structural framework for the dashboard
+import DashboardLayout from './layouts/DashboardLayout';
+
+// Pages - Authentication & Onboarding
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import GoogleCallback from './pages/GoogleCallback';
+import Onboarding from './pages/Onboarding';
+
+// Pages - Intelligence Core
+import Dashboard from './pages/Dashboard';
+import Market from './pages/Market';
+import AIAdvisor from './pages/AIAdvisor';
+import WealthPlanner from './pages/WealthPlanner';
+import Goals from './pages/Goals';
+import Profile from './pages/Profile';
+import Analytics from './pages/Analytics';
+
+/**
+ * World-Class Security: ProtectedRoute
+ * Intercepts unauthorized access and redirects to the login terminal.
+ */
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  // If no token exists, we force the session back to the Authorization Node
+  return token ? children : <Navigate to="/login" replace />;
+};
+
+export default function App() {
+  const location = useLocation();
+
+  return (
+    <div className="bg-[#060b13] min-h-screen selection:bg-emerald-500/30 selection:text-emerald-400">
+      <AnimatePresence mode="wait" initial={false}>
+        {/* The location and key allow Framer Motion to detect route changes 
+          and trigger the orchestrated 'Quantum' exit/entry animations.
+        */}
+        <Routes location={location} key={location.pathname}>
+          
+          {/* --- Public Authentication Flow --- */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          
+          {/* Handles the secure redirect after Google OAuth. 
+            Matches the redirect in backend/main.py: /auth-success 
+          */}
+          <Route path="/auth-success" element={<GoogleCallback />} />
+
+          {/* --- Persona Calibration Step --- */}
+          <Route 
+            path="/onboarding" 
+            element={
+              <ProtectedRoute>
+                <Onboarding />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* --- Secure Authority Ecosystem --- */}
+          <Route 
+            path="/" 
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
+            {/* Automatic redirection from root to System Overview */}
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            
+            {/* Core Dashboard Modules */}
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="analytics" element={<Analytics />} />
+            <Route path="market" element={<Market />} />
+            <Route path="ai-advisor" element={<AIAdvisor />} />
+            <Route path="planner" element={<WealthPlanner />} />
+            <Route path="goals" element={<Goals />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
+
+          {/* --- Global Intelligence Fallback --- */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </AnimatePresence>
+    </div>
+  );
+}

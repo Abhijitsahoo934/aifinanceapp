@@ -1,0 +1,23 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Production
+node_modules
+dist
+dist-ssr
+
+# --- SECURITY: API KEYS & SECRETS ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Editor directories
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
