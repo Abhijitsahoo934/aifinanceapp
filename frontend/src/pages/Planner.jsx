@@ -30,7 +30,7 @@ export default function Planner() {
   const fetchProjection = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:8000/api/calculate-sip', {
+      const res = await axios.get('/api/calculate-sip', {
         params: {
           amount: params.amount, rate: params.rate, years: params.years, step_up: params.step_up
         }
@@ -68,7 +68,7 @@ export default function Planner() {
     e.preventDefault();
     setSyncStatus({ state: 'loading', msg: '' });
     try {
-      await axios.post('http://localhost:8000/api/portfolio/sync', {
+      await axios.post('/api/portfolio/sync', {
         email: user.email,
         ...portfolio
       });

@@ -78,7 +78,7 @@ export default function Dashboard() {
     try {
       // Dynamically use the Vite Environment Variable so it works on Localhost AND Render
       const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const res = await axios.get(`${API_URL}/api/market-status`);
+      const res = await axios.get(`/api/market-status`);
       setMarket(res.data);
     } catch (err) { 
       console.error("Market Intelligence Offline", err); 

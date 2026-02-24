@@ -15,7 +15,7 @@ export default function ForgotPassword() {
     setStatus({ type: '', message: '' });
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/forgot-password', { 
+      await axios.post('/api/forgot-password', { 
         email: email.toLowerCase().trim() 
       });
       

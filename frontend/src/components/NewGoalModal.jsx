@@ -37,7 +37,7 @@ export default function NewGoalModal({ isOpen, onClose, onCreated, userEmail }) 
       }
 
       // 3. Send to FastAPI
-      await axios.post('http://localhost:8000/api/goals', payload);
+      await axios.post('/api/goals', payload);
       
       // Reset form and trigger refresh
       setFormData({ title: '', target_amount: '', current_amount: '', category: 'Savings', deadline: '' });

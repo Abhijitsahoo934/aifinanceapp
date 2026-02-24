@@ -18,7 +18,7 @@ export default function Goals() {
 
   const fetchGoals = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/goals', { 
+      const res = await axios.get('/api/goals', { 
         params: { email: user.email } 
       });
       setGoals(res.data);
@@ -34,7 +34,7 @@ export default function Goals() {
   const handleAddGoal = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:8000/api/goals', {
+      await axios.post('/api/goals', {
         ...newGoal,
         user_email: user.email,
         target_amount: parseFloat(newGoal.target_amount)
@@ -48,7 +48,7 @@ export default function Goals() {
 
   const deleteGoal = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/api/goals/${id}`, { 
+      await axios.delete(`/api/goals/${id}`, { 
         params: { email: user.email } 
       });
       fetchGoals();

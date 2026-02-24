@@ -13,7 +13,7 @@ export default function Market() {
     setLoading(true);
     try {
       // 1. Fetch Market Status from your local FastAPI backend
-      const marketRes = await axios.get('http://127.0.0.1:8000/api/market-status');
+      const marketRes = await axios.get('/api/market-status');
       setMarket(marketRes.data);
 
       // 2. Fetch Indian Financial News from GNews

@@ -10,7 +10,7 @@ export default function WealthSummaryCard({ userEmail }) {
   const fetchAnalytics = useCallback(async () => {
     if (!userEmail) return;
     try {
-      const res = await axios.get(`http://localhost:8000/api/analytics/comprehensive`, {
+      const res = await axios.get(`/api/analytics/comprehensive`, {
         params: { email: userEmail }
       });
       setStats(res.data);

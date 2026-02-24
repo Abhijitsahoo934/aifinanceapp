@@ -29,7 +29,7 @@ export default function InjectionModal({ isOpen, onClose, goal, onUpdate }) {
     setLoading(true);
     try {
       // MATCHED TO BACKEND: POST request with query parameters
-      await axios.post(`http://localhost:8000/api/goals/inject`, null, {
+      await axios.post(`/api/goals/inject`, null, {
         params: {
           goal_id: goal.id,
           amount: parseFloat(amount)

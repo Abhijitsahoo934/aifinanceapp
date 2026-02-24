@@ -32,7 +32,7 @@ export default function Analytics() {
       try {
         // 1. Fetch Personal Postgres Telemetry
         if (user.email) {
-          const analyticsRes = await axios.get(`http://localhost:8000/api/analytics/comprehensive`, {
+          const analyticsRes = await axios.get(`/api/analytics/comprehensive`, {
             params: { email: user.email }
           }).catch(err => console.error("Postgres Analytics Error:", err));
           

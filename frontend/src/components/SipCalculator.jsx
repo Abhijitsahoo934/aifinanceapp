@@ -12,7 +12,7 @@ export default function SipCalculator() {
   const calculate = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/calculate-sip`, {
+      const res = await axios.get(`/api/calculate-sip`, {
         params: data
       });
       setResult(res.data);

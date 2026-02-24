@@ -31,7 +31,7 @@ export default function WealthPlanner() {
   const calculateSip = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://127.0.0.1:8000/api/calculate-sip`, {
+      const res = await axios.get(`/api/calculate-sip`, {
         params: { 
           amount: Number(sipInput.amount), 
           rate: Number(sipInput.rate), 

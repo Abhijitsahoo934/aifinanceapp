@@ -66,7 +66,7 @@ export default function Onboarding() {
     try {
       // 2. Synchronize Persona with PostgreSQL Backend
       if (authUser.email) {
-        await axios.post('http://localhost:8000/api/user/update-persona', {
+        await axios.post('/api/user/update-persona', {
           email: authUser.email,
           role: role,
           level: level
