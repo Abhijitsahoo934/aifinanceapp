@@ -22,7 +22,7 @@ export default function Signup() {
 
     try {
       // 1. Send registration request (Backend automatically assigns baseline student/beginner)
-      const res = await axios.post('http://127.0.0.1:8000/api/register', {
+      const res = await axios.post('/api/register', {
         email: normalizedEmail,
         password: formData.password
       });

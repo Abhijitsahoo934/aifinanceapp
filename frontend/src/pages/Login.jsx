@@ -17,7 +17,7 @@ export default function Login() {
     
     try {
       // 1. Send authentication request to the FastAPI backend
-      const res = await axios.post('http://127.0.0.1:8000/api/login', {
+      const res = await axios.post('/api/login', {
         email: formData.email.toLowerCase().trim(),
         password: formData.password
       });
