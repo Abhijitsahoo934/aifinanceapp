@@ -1,0 +1,34 @@
+services:
+  # 1. The Local Database Vault
+  # This container is for local testing ONLY. 
+  # In production (Render), Render connects directly to Neon.
+  db:
+    image: postgres:15-alpine
+    container_name: financepro_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: aifinance
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. The Unified Engine (React + FastAPI)
+  # This builds your combined monolith image.
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: financepro_app
+    restart: always
+    env_file:
+      - .env  # This uses your Master .env file in the root directory
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

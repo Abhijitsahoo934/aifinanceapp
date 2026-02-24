@@ -39,7 +39,7 @@ export default function Login() {
       // 3. Clear legacy keys to prevent "Guest" fallback
       localStorage.removeItem('userPersona');
 
-      // 4. Force a fresh navigation to Dashboard
+      // 4. Force a fresh navigation to the Command Center
       navigate('/dashboard');
       window.location.reload(); // Ensures the DashboardLayout reads the new localStorage immediately
       
@@ -53,7 +53,7 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     // 302 Redirect Handshake for OAuth
-    // Make sure your backend saves the 'user' object to localStorage on the redirect-back
+    // The backend will handle saving the 'user' object to localStorage on the redirect callback
     const apiUrl = 'http://localhost:8000';
     window.location.href = `${apiUrl}/api/auth/google/login`;
   };
@@ -144,6 +144,7 @@ export default function Login() {
           <motion.button 
             whileHover={{ y: -2, scale: 1.01 }}
             onClick={handleGoogleLogin}
+            type="button"
             className="w-full py-5 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all flex items-center justify-center gap-3 border border-white/20"
           >
             <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="G" />

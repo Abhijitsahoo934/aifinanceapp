@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "react-gauge-component": "^2.0.26",
-    "recharts": "^3.7.0"
-  }
-}

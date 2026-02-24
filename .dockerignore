@@ -1,0 +1,31 @@
+# --- Frontend ---
+**/node_modules/
+**/dist/
+**/dist-ssr/
+
+# --- Backend ---
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+**/.Python
+**/venv/
+**/backend/venv/
+**/.venv/
+
+# --- Environment & Secrets ---
+# We provide these via Render's dashboard, NOT the image
+# .env   <-- Isko humne comment kar diya taaki Vite isko read kar sake
+.env.*
+.git
+.gitignore
+
+# --- Storage & DB ---
+postgres_data/
+*.db
+*.sqlite3
+
+# --- OS & IDE ---
+.DS_Store
+.vscode/
+.idea/

@@ -28,17 +28,17 @@ export default function HealthForm({ userEmail: propEmail, onComplete }) {
 
     setLoading(true);
     try {
-      // 1. Sync data to Backend
-      await axios.post('http://127.0.0.1:8000/api/portfolio/sync', {
-        email: email.toLowerCase().strip ? email.toLowerCase().strip() : email.toLowerCase(),
+      // 1. Sync data to Backend (Fixed: Removed 127.0.0.1 and fixed .trim())
+      await axios.post('/api/portfolio/sync', {
+        email: email.toLowerCase().trim(),
         income: parseFloat(data.income) || 0,
         expenses: parseFloat(data.expenses) || 0,
         savings: parseFloat(data.savings) || 0,
         investments: parseFloat(data.investments) || 0
       });
 
-      // 2. Fetch Comprehensive Intelligence
-      const res = await axios.get(`http://127.0.0.1:8000/api/analytics/comprehensive?email=${email}`);
+      // 2. Fetch Comprehensive Intelligence (Fixed: Removed 127.0.0.1)
+      const res = await axios.get(`/api/analytics/comprehensive?email=${email}`);
       
       // 3. Update Visual State
       setStats(res.data);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Added for navigation
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Activity, 
@@ -11,6 +11,7 @@ import {
   Clock 
 } from 'lucide-react';
 import HealthForm from '../components/HealthForm';
+import WealthSummaryCard from '../components/WealthSummaryCard';
 
 const container = {
   hidden: { opacity: 0 },
@@ -26,19 +27,58 @@ const item = {
 };
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
+  // ==========================================
+  // 1. THE GOOGLE OAUTH INTERCEPTOR (CRITICAL FIX)
+  // ==========================================
+  // This runs instantly before React even tries to render the HTML.
+  // It catches the token from the URL and saves it securely.
+  const searchParams = new URLSearchParams(window.location.search);
+  const urlToken = searchParams.get('auth_token');
+  
+  if (urlToken) {
+    const newUserData = {
+      email: searchParams.get('email'),
+      role: searchParams.get('role'),
+      level: searchParams.get('level'),
+      token: urlToken
+    };
+    
+    // Save to browser memory so the "Bouncer" knows you are authenticated
+    localStorage.setItem('token', urlToken);
+    localStorage.setItem('user', JSON.stringify(newUserData));
+    
+    // Clean the URL so it looks professional (removes the ugly token string)
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
+  // ==========================================
+  // 2. STATE INITIALIZATION
+  // ==========================================
   const [market, setMarket] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const navigate = useNavigate(); // Hook initialized
   
-  // Normalized key 'user' from your login system
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  
+  // Safely load user. If they bypass the login page entirely and have no data, redirect them.
+  const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
+
+  useEffect(() => {
+    if (!user || !user.email) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
 
+  // ==========================================
+  // 3. INTELLIGENCE FETCHING
+  // ==========================================
   const fetchMarket = useCallback(async () => {
     try {
-      const res = await axios.get('http://127.0.0.1:8000/api/market-status');
+      // Dynamically use the Vite Environment Variable so it works on Localhost AND Render
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const res = await axios.get(`${API_URL}/api/market-status`);
       setMarket(res.data);
     } catch (err) { 
       console.error("Market Intelligence Offline", err); 
@@ -54,6 +94,9 @@ export default function Dashboard() {
     fetchMarket(); 
   };
 
+  // If there's no user, show a blank screen momentarily while it redirects
+  if (!user || !user.email) return null;
+
   return (
     <motion.div 
       variants={container}
@@ -61,6 +104,7 @@ export default function Dashboard() {
       animate="show"
       className="max-w-7xl mx-auto space-y-10 pb-20"
     >
+      {/* --- HEADER: Identity & Temporal Sync --- */}
       <motion.div variants={item} className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-emerald-500 font-black text-[10px] uppercase tracking-[0.3em]">
@@ -84,7 +128,18 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
+      {/* --- LAYER 1: Global Wealth Summary --- */}
+      <motion.div variants={item} className="w-full">
+        <WealthSummaryCard 
+          userEmail={user.email} 
+          key={`wealth-${refreshTrigger}`} 
+        />
+      </motion.div>
+
+      {/* --- LAYER 2: Market Data & Diagnostic Matrix --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Market Intel Card */}
         <motion.div 
           variants={item}
           whileHover={{ y: -5 }}
@@ -122,6 +177,7 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
+        {/* Health Scanner / Portfolio Updater */}
         <motion.div variants={item} className="lg:col-span-2 glass-card p-10 rounded-[3rem] bg-[#0c121d]/50 border border-white/5 relative overflow-hidden">
           <div className="flex items-center justify-between mb-10">
             <div className="flex items-center gap-5">
@@ -138,12 +194,13 @@ export default function Dashboard() {
             <HealthForm 
               userEmail={user.email} 
               onComplete={handleDiagnosticComplete} 
-              key={refreshTrigger} 
+              key={`healthform-${refreshTrigger}`} 
             />
           </div>
         </motion.div>
       </div>
 
+      {/* --- FOOTER: AI Insight Protocol --- */}
       <motion.div variants={item} className="p-8 bg-gradient-to-r from-[#0c121d] to-[#060b13] rounded-[2.5rem] border border-white/5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
         <div className="flex items-center gap-6">
           <div className="relative">

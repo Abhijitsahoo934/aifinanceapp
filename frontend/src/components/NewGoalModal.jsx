@@ -1,186 +1,207 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Target, Rocket, Landmark, Loader2, Sparkles, TrendingUp } from 'lucide-react';
-
-const categories = [
-  { id: 'Side Hustle', icon: Rocket, color: 'text-orange-500' },
-  { id: 'Investment', icon: TrendingUp, color: 'text-blue-500' },
-  { id: 'Savings', icon: Landmark, color: 'text-emerald-500' }
-];
+import { X, Target, Wallet, Calendar, Tag, Loader2, AlertCircle } from 'lucide-react';
 
 export default function NewGoalModal({ isOpen, onClose, onCreated, userEmail }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     target_amount: '',
-    category: 'Side Hustle'
+    current_amount: '',
+    category: 'Savings',
+    deadline: ''
   });
-  const [loading, setLoading] = useState(false);
+
+  const categories = ['Savings', 'Investment', 'Side Hustle', 'Debt Payoff', 'Milestone'];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // 1. Safety Check: Identity Presence
-    if (!userEmail) {
-      alert("Identity Error: Session expired or invalid. Please log in again.");
-      return;
-    }
-
-    // 2. Safety Check: Form Data
-    if (!formData.title || !formData.target_amount) {
-        alert("Input Error: Please fill in all required fields.");
-        return;
-    }
-
     setLoading(true);
+    setError(null);
 
     try {
-      // 3. Payload Construction (JavaScript logic, not Python)
+      // 1. Build the base payload WITHOUT the deadline
       const payload = {
-        email: userEmail.trim().toLowerCase(), // FIX: .strip() removed, .trim() used
-        title: formData.title.trim(),
-        target_amount: parseFloat(formData.target_amount), // Ensure float
+        title: formData.title,
+        target_amount: parseFloat(formData.target_amount),
+        current_amount: parseFloat(formData.current_amount) || 0,
         category: formData.category,
-        current_amount: 0.0
+        user_email: userEmail
       };
 
-      // 4. Transmission
-      await axios.post('http://localhost:8000/api/goals/create', payload);
-      
-      // 5. Success Protocol
-      onCreated(); // Refresh parent
-      setFormData({ title: '', target_amount: '', category: 'Side Hustle' }); // Reset
-      onClose();
-      
-    } catch (err) {
-      console.error("Establishment Error:", err);
-      
-      const serverMessage = err.response?.data?.detail;
-      const status = err.response?.status;
-
-      if (status === 404) {
-         alert("Protocol Failure (404): Identity node not found in database. Please register/login again.");
-      } else if (status === 422) {
-         alert("Data Mismatch (422): Ensure target amount is a valid number.");
-      } else {
-         alert(`System Error: ${serverMessage || "Backend connection failed."}`);
+      // 2. Only attach the deadline if the user actually picked a date
+      if (formData.deadline) {
+        payload.deadline = formData.deadline;
       }
+
+      // 3. Send to FastAPI
+      await axios.post('http://localhost:8000/api/goals', payload);
+      
+      // Reset form and trigger refresh
+      setFormData({ title: '', target_amount: '', current_amount: '', category: 'Savings', deadline: '' });
+      onCreated(); 
+      onClose();
+    } catch (err) {
+      console.error("Objective Creation Failed:", err.response?.data || err.message);
+      
+      // Capture the exact FastAPI error and show it in the UI
+      const backendError = err.response?.data?.detail;
+      setError(
+        Array.isArray(backendError) 
+          ? `Data Error: ${backendError[0].loc[1]} ${backendError[0].msg}` 
+          : "System failure: Unable to establish objective."
+      );
     } finally {
       setLoading(false);
     }
   };
+  
+  if (!isOpen) return null;
 
   return (
     <AnimatePresence>
-      {isOpen && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6">
-          {/* Backdrop */}
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="absolute inset-0 bg-[#060b13]/90 backdrop-blur-xl"
-          />
-          
-          {/* Modal Content */}
-          <motion.div 
-            initial={{ scale: 0.9, y: 30, opacity: 0 }} 
-            animate={{ scale: 1, y: 0, opacity: 1 }} 
-            exit={{ scale: 0.9, y: 30, opacity: 0 }}
-            className="relative w-full max-w-xl bg-[#0c121d] border border-white/10 p-10 md:p-12 rounded-[3.5rem] shadow-[0_0_100px_rgba(0,0,0,0.8)]"
-          >
-            <button 
-              onClick={onClose} 
-              className="absolute top-10 right-10 text-slate-500 hover:text-white transition-all hover:rotate-90"
-            >
-              <X size={24} />
-            </button>
-            
-            <div className="mb-10 space-y-2">
-              <div className="flex items-center gap-3 text-emerald-500 mb-2">
-                <Target size={20} className="animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.4em]">Establishment Protocol</span>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+        
+        {/* Backdrop Blur Overlay */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="absolute inset-0 bg-[#060b13]/80 backdrop-blur-sm"
+        />
+
+        {/* Modal Content */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="relative w-full max-w-md glass-card rounded-[2.5rem] bg-[#0c121d] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden"
+        >
+          {/* Ambient Glow */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
+
+          <div className="p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-2xl font-black text-white uppercase italic tracking-tight">
+                  New <span className="text-emerald-500">Objective</span>
+                </h3>
+                <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1">Initialize Target Parameters</p>
               </div>
-              <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">
-                New <span className="text-emerald-500">Milestone</span>
-              </h2>
+              <button 
+                onClick={onClose}
+                className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+              >
+                <X size={20} />
+              </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Objective Title */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-4">Target Name</label>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              
+              {error && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 text-red-500 text-[10px] font-bold uppercase">
+                  <AlertCircle size={14} /> {error}
+                </div>
+              )}
+
+              {/* Title Input */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                  <Target size={12} className="text-emerald-500"/> Objective Designation
+                </label>
                 <input 
-                  required
-                  autoFocus
-                  className="w-full bg-[#060b13] border border-white/5 rounded-3xl py-6 px-8 text-white font-bold text-lg outline-none focus:border-emerald-500/50 transition-all placeholder:text-slate-800 shadow-inner"
-                  placeholder="e.g. Startup Seed Capital"
+                  type="text" required
+                  placeholder="e.g., Emergency Fund, App Launch..."
                   value={formData.title}
-                  onChange={(e) => setFormData({...formData, title: e.target.value})}
+                  onChange={e => setFormData({...formData, title: e.target.value})}
+                  className="w-full bg-[#060b13] border border-white/5 rounded-2xl py-3.5 px-4 text-xs font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-emerald-500/50 transition-all"
                 />
               </div>
 
-              {/* Target Amount */}
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-4">Target Liquidity (₹)</label>
-                <div className="relative">
-                   <div className="absolute left-6 top-1/2 -translate-y-1/2 text-emerald-500 font-bold text-xl">₹</div>
-                   <input 
-                    required
-                    type="number"
-                    step="0.01"
-                    className="w-full bg-[#060b13] border border-white/5 rounded-3xl py-6 px-14 text-white font-black text-2xl outline-none focus:border-emerald-500/50 transition-all placeholder:text-slate-800 shadow-inner"
-                    placeholder="5,00,000"
+              <div className="grid grid-cols-2 gap-4">
+                {/* Target Amount */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <Wallet size={12} className="text-emerald-500"/> Target (₹)
+                  </label>
+                  <input 
+                    type="number" required min="1"
+                    placeholder="100000"
                     value={formData.target_amount}
-                    onChange={(e) => setFormData({...formData, target_amount: e.target.value})}
+                    onChange={e => setFormData({...formData, target_amount: e.target.value})}
+                    className="w-full bg-[#060b13] border border-white/5 rounded-2xl py-3.5 px-4 text-xs font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-emerald-500/50 transition-all"
+                  />
+                </div>
+
+                {/* Initial Capital */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <Wallet size={12} className="text-slate-500"/> Initial Capital (₹)
+                  </label>
+                  <input 
+                    type="number" min="0"
+                    placeholder="0"
+                    value={formData.current_amount}
+                    onChange={e => setFormData({...formData, current_amount: e.target.value})}
+                    className="w-full bg-[#060b13] border border-white/5 rounded-2xl py-3.5 px-4 text-xs font-bold text-white placeholder:text-slate-700 focus:outline-none focus:border-emerald-500/50 transition-all"
                   />
                 </div>
               </div>
 
-              {/* Category Selection */}
-              <div className="space-y-4">
-                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest ml-4">Objective Tier</label>
-                <div className="grid grid-cols-3 gap-4">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => setFormData({...formData, category: cat.id})}
-                      className={`group flex flex-col items-center gap-3 p-5 rounded-[2rem] border transition-all duration-300 ${
-                        formData.category === cat.id 
-                        ? 'bg-emerald-600/10 border-emerald-500/50 text-white shadow-[0_0_30px_rgba(16,185,129,0.1)]' 
-                        : 'bg-[#060b13] border-white/5 text-slate-600 hover:border-white/20'
-                      }`}
-                    >
-                      <cat.icon size={20} className={formData.category === cat.id ? 'text-emerald-400' : 'text-slate-700 group-hover:text-slate-400'} />
-                      <span className="text-[9px] font-black uppercase tracking-tighter">{cat.id}</span>
-                    </button>
-                  ))}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Category Dropdown */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <Tag size={12} className="text-emerald-500"/> Category
+                  </label>
+                  <select 
+                    value={formData.category}
+                    onChange={e => setFormData({...formData, category: e.target.value})}
+                    className="w-full bg-[#060b13] border border-white/5 rounded-2xl py-3.5 px-4 text-xs font-bold text-white focus:outline-none focus:border-emerald-500/50 transition-all appearance-none cursor-pointer"
+                  >
+                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                </div>
+
+                {/* Deadline */}
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                    <Calendar size={12} className="text-emerald-500"/> Deadline (Opt)
+                  </label>
+                  <input 
+                    type="date"
+                    value={formData.deadline}
+                    onChange={e => setFormData({...formData, deadline: e.target.value})}
+                    className="w-full bg-[#060b13] border border-white/5 rounded-2xl py-3.5 px-4 text-xs font-bold text-slate-400 focus:outline-none focus:border-emerald-500/50 transition-all"
+                  />
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <motion.button 
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit" 
-                disabled={loading}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 py-7 rounded-[2rem] text-white font-black uppercase tracking-[0.4em] text-xs shadow-2xl shadow-emerald-600/30 transition-all flex items-center justify-center gap-3 border border-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <Loader2 className="animate-spin" size={20} />
-                ) : (
-                  <>
-                    <Sparkles size={18} />
-                    Initialize Protocol
-                  </>
-                )}
-              </motion.button>
+              {/* Action Buttons */}
+              <div className="pt-4 flex gap-3">
+                <button 
+                  type="button" 
+                  onClick={onClose}
+                  className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)] transition-all flex items-center justify-center gap-2"
+                >
+                  {loading ? <Loader2 className="animate-spin" size={16} /> : "Establish Node"}
+                </button>
+              </div>
+
             </form>
-          </motion.div>
-        </div>
-      )}
+          </div>
+        </motion.div>
+      </div>
     </AnimatePresence>
   );
 }

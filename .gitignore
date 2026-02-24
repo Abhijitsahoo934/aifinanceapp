@@ -1,15 +1,55 @@
-# Frontend
+# --- OS & IDE ---
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# --- Frontend (Node.js/Vite) ---
 node_modules/
 dist/
-.DS_Store
+dist-ssr/
+*.local
+.eslintcache
 
-# Backend
+# --- Backend (Python) ---
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+backend/venv/
+.venv/
+build/
+develop-eggs/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- Databases ---
+# We use Neon (Cloud Postgres), so local DB files should never be committed
 *.db
 *.sqlite3
-backend/venv/
-venv/
-env/
+*.sql
 
-# Secrets
+# --- Secrets & Environment ---
+# CRITICAL: Never push your Groq, Google, or Neon keys to GitHub
 .env
+.env.local
+.env.*.local
+.env.production
+.python-version
+
+# --- Docker ---
+# Ignore local data volumes if you create them
+postgres_data/

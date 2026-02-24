@@ -2,14 +2,12 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { UserPlus, Shield, Mail, Lock, ChevronRight, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { Shield, Mail, Lock, Loader2, Sparkles, AlertCircle } from 'lucide-react';
 
 export default function Signup() {
   const [formData, setFormData] = useState({ 
     email: '', 
-    password: '', 
-    role: 'student', 
-    level: 'beginner' 
+    password: '' 
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -23,16 +21,16 @@ export default function Signup() {
     const normalizedEmail = formData.email.toLowerCase().trim();
 
     try {
-      // 1. Send registration request
+      // 1. Send registration request (Backend automatically assigns baseline student/beginner)
       const res = await axios.post('http://127.0.0.1:8000/api/register', {
-        ...formData,
-        email: normalizedEmail
+        email: normalizedEmail,
+        password: formData.password
       });
       
       /**
        * 2. SYNCHRONIZED IDENTITY STORAGE
-       * We save the user object immediately so the Dashboard doesn't show "Guest".
-       * We derive the 'name' from the email prefix for the "Good Morning" greeting.
+       * We save the baseline user object immediately.
+       * The 'name' is derived from the email prefix for the "Good Morning" greeting.
        */
       const namePrefix = normalizedEmail.split('@')[0];
       const authorityName = namePrefix.charAt(0).toUpperCase() + namePrefix.slice(1);
@@ -40,8 +38,8 @@ export default function Signup() {
       localStorage.setItem('user', JSON.stringify({
         email: normalizedEmail,
         name: authorityName,
-        role: formData.role,
-        level: formData.level,
+        role: 'student', // Baseline before Onboarding
+        level: 'beginner', // Baseline before Onboarding
       }));
 
       // 3. Store Token separately for API Authorization headers
@@ -49,13 +47,11 @@ export default function Signup() {
         localStorage.setItem('token', res.data.token);
       }
 
-      // 4. Clear legacy keys
+      // 4. Clear legacy keys to prevent cache conflicts
       localStorage.removeItem('userPersona');
 
-      // 5. Direct hand-off to Login or Dashboard
-      // Usually, we go to Login to verify credentials, but we keep the 'user' 
-      // object ready so the email field can be pre-filled or session-ready.
-      navigate('/login');
+      // 5. Seamless Hand-off to the Onboarding Calibration Sequence
+      navigate('/onboarding');
       
     } catch (err) {
       console.error("Signup Failure:", err);
@@ -128,32 +124,6 @@ export default function Signup() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest pl-2">Persona</label>
-                <select 
-                  onChange={e => setFormData({...formData, role: e.target.value})} 
-                  className="w-full bg-[#060b13] border border-white/5 rounded-xl py-4 px-4 text-[11px] font-bold text-white outline-none focus:border-emerald-500/30 transition-all cursor-pointer"
-                >
-                  <option value="student">Student</option>
-                  <option value="professional">Professional</option>
-                  <option value="business">Entrepreneur</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest pl-2">Tier</label>
-                <select 
-                  onChange={e => setFormData({...formData, level: e.target.value})} 
-                  className="w-full bg-[#060b13] border border-white/5 rounded-xl py-4 px-4 text-[11px] font-bold text-white outline-none focus:border-emerald-500/30 transition-all cursor-pointer"
-                >
-                  <option value="beginner">Beginner</option>
-                  <option value="intermediate">Intermediate</option>
-                  <option value="pro">Pro Investor</option>
-                </select>
-              </div>
-            </div>
-
             <motion.button 
               whileHover={{ scale: 1.01, y: -2 }}
               whileTap={{ scale: 0.98 }}
@@ -174,6 +144,7 @@ export default function Signup() {
           <motion.button 
             whileHover={{ y: -2, scale: 1.01 }}
             onClick={handleGoogleSignup}
+            type="button"
             className="w-full py-5 bg-white text-slate-900 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-2xl transition-all flex items-center justify-center gap-3 border border-white/20"
           >
             <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="18" alt="G" />

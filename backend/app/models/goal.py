@@ -1,28 +1,23 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Date
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 from datetime import datetime, timezone
-
 class Goal(Base):
     __tablename__ = "goals"
 
     id = Column(Integer, primary_key=True, index=True)
-    
-    # 1. Foreign Key Linkage
-    # Foreign key is the ID, but we keep user_email for high-speed indexing
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     user_email = Column(String, index=True, nullable=False) 
-    
-    # 2. Goal Specifications
-    title = Column(String, nullable=False)  # e.g., "Venture Capital Seed"
-    category = Column(String, default="Side Hustle") # Side Hustle, Investment, Luxury, Debt
-    
+    title = Column(String, nullable=False)
+    category = Column(String, default="Side Hustle")
     target_amount = Column(Float, nullable=False)
     current_amount = Column(Float, default=0.0)
     
-    # 3. Status and Time Tracking
-    # Status allows the UI to filter between 'active', 'completed', and 'archived'
-    status = Column(String, default="active") 
+    # ENSURE THIS EXACT LINE IS HERE:
+    deadline = Column(Date, nullable=True) 
+    
+    status = Column(String, default="active")
+    # ... rest of the file
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime, 
                         default=lambda: datetime.now(timezone.utc), 

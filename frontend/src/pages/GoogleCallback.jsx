@@ -10,25 +10,31 @@ export default function GoogleCallback() {
   useEffect(() => {
     // 1. Capture the "Financial Authority" credentials from the URL
     const token = searchParams.get('token');
-    const role = searchParams.get('role');
     const email = searchParams.get('email');
-    const level = searchParams.get('level') || 'beginner';
+    const role = searchParams.get('role');
+    const level = searchParams.get('level');
 
     const handleAuth = async () => {
       // 2. Security Theater: Small delay to signify "Encryption & Handshake"
-      await new Promise(resolve => setTimeout(resolve, 1800));
+      await new Promise(resolve => setTimeout(resolve, 2200));
 
       if (token && email) {
         // 3. Persist session to local storage
+        // We save the token and the user object separately for maximum compatibility
         localStorage.setItem('token', token);
-        localStorage.setItem('userPersona', JSON.stringify({ 
+        
+        // Ensure keys match exactly what your Profile and Sidebar components read
+        const userPersona = {
+          email: email,
           role: role || 'student', 
-          email: email, 
-          level: level 
-        }));
+          level: level || 'beginner'
+        };
+
+        localStorage.setItem('user', JSON.stringify(userPersona));
+        localStorage.setItem('userPersona', JSON.stringify(userPersona));
         
         // 4. Redirect to the core ecosystem
-        navigate('/dashboard');
+       navigate('/onboarding');
       } else {
         console.error("Auth Failure: Insufficient session data received from authority nodes.");
         navigate('/login');

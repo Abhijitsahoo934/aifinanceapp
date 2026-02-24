@@ -1,34 +1,36 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Lock, ShieldCheck, Eye, EyeOff, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Lock, Mail, ShieldCheck, Eye, EyeOff, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
 
 export default function ResetPassword() {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const token = searchParams.get('token');
 
   const handleReset = async (e) => {
     e.preventDefault();
     setStatus('loading');
+    
     try {
+      // Sends the required email and new_password to match the FastAPI schema
       await axios.post('http://127.0.0.1:8000/api/reset-password', { 
-        token, 
+        email: email.toLowerCase().trim(), 
         new_password: password 
       });
+      
       setStatus('success');
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/login'), 2500);
     } catch (err) {
       setStatus('error');
       setTimeout(() => setStatus('idle'), 3000);
     }
   };
 
-  // Simple password strength logic
+  // Advanced password strength logic
   const strength = password.length > 8 ? 100 : (password.length / 8) * 100;
 
   return (
@@ -53,7 +55,7 @@ export default function ResetPassword() {
               >
                 {/* Header */}
                 <div className="text-center space-y-3 mb-8">
-                  <div className="mx-auto w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
+                  <div className="mx-auto w-14 h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
                     <ShieldCheck className="text-emerald-500" size={30} />
                   </div>
                   <h2 className="text-2xl font-black tracking-tight text-white uppercase italic">Secure <span className="text-emerald-500">Override</span></h2>
@@ -61,14 +63,30 @@ export default function ResetPassword() {
                 </div>
 
                 <form onSubmit={handleReset} className="space-y-6">
-                  <div className="space-y-2">
+                  
+                  {/* Email Input */}
+                  <div className="relative group">
+                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-500 transition-colors" size={18} />
+                    <input 
+                      type="email" 
+                      placeholder="Authority Email" 
+                      required 
+                      className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-4 pl-12 pr-4 text-sm font-medium text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-all shadow-inner"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)} 
+                    />
+                  </div>
+
+                  {/* Password Input */}
+                  <div className="space-y-3">
                     <div className="relative group">
-                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-500 transition-colors" size={18} />
+                      <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-500 transition-colors" size={18} />
                       <input 
                         type={showPassword ? "text" : "password"} 
-                        placeholder="New Authority Password" 
+                        placeholder="New Security Phrase" 
                         required 
-                        className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-4 pl-12 pr-12 text-sm font-medium text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-all"
+                        className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl py-4 pl-12 pr-12 text-sm font-medium text-white placeholder:text-slate-600 focus:outline-none focus:border-emerald-500/50 transition-all shadow-inner"
+                        value={password}
                         onChange={e => setPassword(e.target.value)} 
                       />
                       <button 
@@ -81,18 +99,18 @@ export default function ResetPassword() {
                     </div>
 
                     {/* Password Strength Meter */}
-                    <div className="px-1 space-y-1.5">
+                    <div className="px-1 space-y-2">
                       <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
                         <span className="text-slate-600">Complexity Score</span>
                         <span className={strength === 100 ? "text-emerald-500" : "text-slate-500"}>
                           {strength === 100 ? "Secure" : "Analyzing..."}
                         </span>
                       </div>
-                      <div className="h-1 w-full bg-slate-900 rounded-full overflow-hidden">
+                      <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-white/5">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: `${strength}%` }}
-                          className={`h-full transition-colors duration-500 ${strength === 100 ? 'bg-emerald-500' : 'bg-blue-500'}`}
+                          className={`h-full transition-colors duration-500 ${strength === 100 ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : 'bg-blue-500'}`}
                         />
                       </div>
                     </div>
@@ -103,7 +121,7 @@ export default function ResetPassword() {
                     whileTap={{ scale: 0.98 }}
                     disabled={status === 'loading'}
                     type="submit" 
-                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 border border-white/10"
                   >
                     {status === 'loading' ? (
                       <Loader2 className="animate-spin" size={18} />
@@ -117,9 +135,9 @@ export default function ResetPassword() {
                   <motion.p 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="mt-4 text-center text-red-400 text-[10px] font-black uppercase tracking-widest"
+                    className="mt-6 text-center text-red-400 text-[10px] font-black uppercase tracking-widest bg-red-500/10 py-2 rounded-lg border border-red-500/20"
                   >
-                    Link Expired or Invalid Token
+                    Invalid Authority Identity or Sync Failure
                   </motion.p>
                 )}
               </motion.div>
@@ -130,19 +148,19 @@ export default function ResetPassword() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="text-center py-6 space-y-6"
               >
-                <div className="h-20 w-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20">
-                  <CheckCircle2 className="text-emerald-500" size={40} />
+                <div className="h-24 w-24 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                  <CheckCircle2 className="text-emerald-500" size={48} />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black text-white">Identity Verified</h2>
+                  <h2 className="text-2xl font-black text-white uppercase italic">Identity Verified</h2>
                   <p className="text-slate-400 text-sm font-medium">Your credentials have been successfully rotated. Redirecting to vault...</p>
                 </div>
-                <div className="flex justify-center">
-                   <div className="w-12 h-1 bg-slate-800 rounded-full overflow-hidden">
+                <div className="flex justify-center pt-4">
+                   <div className="w-16 h-1 bg-slate-800 rounded-full overflow-hidden">
                       <motion.div 
                         initial={{ x: "-100%" }}
                         animate={{ x: "100%" }}
-                        transition={{ repeat: Infinity, duration: 1 }}
+                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                         className="w-full h-full bg-emerald-500"
                       />
                    </div>

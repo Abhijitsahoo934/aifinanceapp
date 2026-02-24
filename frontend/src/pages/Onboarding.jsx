@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Added Axios for backend sync
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
@@ -57,10 +58,44 @@ export default function Onboarding() {
 
   const handleStart = async () => {
     setLoading(true);
-    // Simulating "Neural Calibration" for premium UX feel
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    localStorage.setItem('userPersona', JSON.stringify({ role, level }));
-    navigate('/dashboard');
+    
+    // 1. Retrieve current user identity from storage
+    const authUser = JSON.parse(localStorage.getItem('user') || '{}');
+    const token = localStorage.getItem('token');
+
+    try {
+      // 2. Synchronize Persona with PostgreSQL Backend
+      if (authUser.email) {
+        await axios.post('http://localhost:8000/api/user/update-persona', {
+          email: authUser.email,
+          role: role,
+          level: level
+        }, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+
+      // 3. Update Local Storage for immediate UI sync
+      const updatedUser = { ...authUser, role, level };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem('userPersona', JSON.stringify({ role, level }));
+
+      // 4. Simulating "Neural Calibration" for premium UX feel
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      navigate('/dashboard');
+
+    } catch (err) {
+      console.error("Persona Database Sync Failed:", err);
+      // Fallback: update local storage only so the user isn't blocked from the app
+      const updatedUser = { ...authUser, role, level };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      localStorage.setItem('userPersona', JSON.stringify({ role, level }));
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      navigate('/dashboard');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
