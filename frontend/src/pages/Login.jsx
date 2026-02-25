@@ -54,8 +54,7 @@ export default function Login() {
   const handleGoogleLogin = () => {
     // 302 Redirect Handshake for OAuth
     // The backend will handle saving the 'user' object to localStorage on the redirect callback
-    const apiUrl = 'http://localhost:8000';
-    window.location.href = `${apiUrl}/api/auth/google/login`;
+    window.location.href = `/api/auth/google/login`;
   };
 
   return (

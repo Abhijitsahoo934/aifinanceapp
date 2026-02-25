@@ -61,10 +61,9 @@ export default function Signup() {
     }
   };
 
-  const handleGoogleSignup = () => {
-    // OAuth 302 Redirect Handshake
-    const apiUrl = 'http://localhost:8000';
-    window.location.href = `${apiUrl}/api/auth/google/login`;
+const handleGoogleSignup = () => {
+    // OAuth 302 Redirect Handshake (Using Relative Path for Production)
+    window.location.href = '/api/auth/google/login';
   };
 
   return (
